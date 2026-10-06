@@ -1,1 +1,136 @@
 
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thumbnail Maker</title>
+<style>
+:root{--bg:#eef1f6;--ink:#14213d;--card:#fff;--line:#d3dae6;--acc:#2447d6;--mut:#5b6785}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+h1{margin:0;padding:14px 16px;font-size:20px}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;padding:0 16px 40px;max-width:1100px;margin:auto}
+.pv{position:sticky;top:8px;align-self:start;order:2}
+.ctl{order:1}
+canvas{display:block;margin:0 auto;width:auto;height:auto;max-width:100%;max-height:75vh;border:1px solid var(--line);border-radius:8px;background:#ccd}
+fieldset{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:0 0 10px;padding:8px 14px 12px}
+legend{font-weight:700;padding:0 6px}
+label{display:block;font-size:13px;color:var(--mut);margin:8px 0 3px}
+input[type=text],select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+input[type=range]{width:100%}
+input[type=file]{width:100%;font-size:13px}
+input[type=color]{width:100%;height:36px;padding:2px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.r{display:flex;gap:10px}.r>*{flex:1;min-width:0}
+.ck{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink);margin:8px 0 0}
+button{font:inherit;cursor:pointer;border-radius:8px;padding:9px 14px;border:1px solid var(--line);background:#fff;color:var(--ink);margin-top:8px}
+.go{background:var(--acc);color:#fff;border:0}
+:focus-visible{outline:3px solid #8fa5ff;outline-offset:2px}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}.pv{order:0;top:0;z-index:2;background:var(--bg);padding:6px 0}canvas{max-height:28vh}.pv button,.pv select{margin-top:4px;padding:6px 10px}}
+</style></head><body>
+<h1>Thumbnail Maker <small style="font-weight:400;color:var(--mut)">works offline</small></h1>
+<div class="wrap">
+<div class="pv"><canvas id="cv"></canvas>
+<div class="r"><select id="fmt" aria-label="Format"><option value="png">PNG</option><option value="jpeg">JPG</option></select><button class="go" id="dl">Download</button></div></div>
+
+<div class="ctl">
+<fieldset><legend>Canvas</legend>
+<label for="sz">Size</label>
+<select id="sz"><option value="1200x630">Blog / Facebook 1200×630</option><option value="1000x1500">Pinterest 1000×1500</option><option value="1080x1350">Instagram 4:5 1080×1350</option><option value="1080x1920">Story / Reel 1080×1920</option><option value="1280x720">YouTube 1280×720</option><option value="1080x1080">Square 1080×1080</option></select>
+</fieldset>
+
+<fieldset><legend>Background</legend>
+<label for="bi">Photo (optional)</label><input type="file" id="bi" accept="image/*">
+<div class="r"><div><label for="zm">Zoom</label><input type="range" id="zm" min="100" max="300" value="100"></div>
+<div><label for="px">Move left / right</label><input type="range" id="px" min="0" max="100" value="50"></div>
+<div><label for="py">Move up / down</label><input type="range" id="py" min="0" max="100" value="50"></div></div>
+<div class="r"><div><label for="c1">Gradient start</label><input type="color" id="c1" value="#2447d6"></div>
+<div><label for="c2">Gradient end</label><input type="color" id="c2" value="#0b1d4f"></div>
+<div><label for="oc">Overlay colour</label><input type="color" id="oc" value="#000000"></div></div>
+<label for="ov">Overlay strength (helps text stand out on photos)</label><input type="range" id="ov" min="0" max="90" value="35">
+<button id="rb">Remove photo</button>
+</fieldset>
+
+<fieldset><legend>Text</legend>
+<label for="ttl">Headline</label><input type="text" id="ttl" placeholder="Type your headline">
+<label for="sb">Small text</label><input type="text" id="sb" placeholder="Type small text (optional)">
+<div class="r"><div><label for="ff">Font</label><select id="ff">
+<option value="Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif">Impact</option>
+<option value="'Arial Black',Gadget,sans-serif">Arial Black</option>
+<option value="Georgia,'Times New Roman',serif">Georgia</option>
+<option value="'Trebuchet MS',Helvetica,sans-serif">Trebuchet</option>
+<option value="'Segoe UI',Roboto,Helvetica,Arial,sans-serif">Sans</option>
+<option value="'Courier New',monospace">Mono</option></select></div>
+<div><label for="tc">Text colour</label><input type="color" id="tc" value="#ffffff"></div>
+<div><label for="hc">Highlight colour</label><input type="color" id="hc" value="#ffd60a"></div></div>
+<div class="r"><div><label for="fz">Text size</label><input type="range" id="fz" min="4" max="20" step="0.5" value="11"></div>
+<div><label for="sz2">Small text size</label><input type="range" id="sz2" min="20" max="80" value="40"></div></div>
+<div class="r"><div><label for="al">Align</label><select id="al"><option value="center">Centre</option><option value="left">Left</option><option value="right">Right</option></select></div>
+<div><label for="va">Position</label><select id="va"><option value="middle">Middle</option><option value="top">Top</option><option value="bottom">Bottom</option></select></div></div>
+<label class="ck"><input type="checkbox" id="sh" checked> Shadow</label>
+<label class="ck"><input type="checkbox" id="ol"> Dark outline</label>
+<label class="ck"><input type="checkbox" id="hl"> Highlight box behind headline</label>
+</fieldset>
+
+<fieldset><legend>Logo or sticker</legend>
+<label for="li">Image (PNG with transparent background works best)</label><input type="file" id="li" accept="image/*">
+<div class="r"><div><label for="ls">Size</label><input type="range" id="ls" min="5" max="60" value="20"></div>
+<div><label for="lp">Position</label><select id="lp"><option value="br">Bottom right</option><option value="bl">Bottom left</option><option value="tr">Top right</option><option value="tl">Top left</option><option value="c">Centre</option></select></div></div>
+<button id="rl">Remove logo</button>
+</fieldset>
+</div></div>
+
+<script>
+const $=id=>document.getElementById(id),cv=$('cv'),cx=cv.getContext('2d');
+let bg=null,lg=null;
+function load(inp,set){const f=inp.files[0];if(!f)return;const im=new Image();
+  im.onload=()=>{set(im);draw()};im.src=URL.createObjectURL(f)}
+$('bi').onchange=e=>load(e.target,im=>bg=im);
+$('li').onchange=e=>load(e.target,im=>lg=im);
+$('rb').onclick=()=>{bg=null;$('bi').value='';draw()};
+$('rl').onclick=()=>{lg=null;$('li').value='';draw()};
+
+function draw(){
+  const[w,h]=$('sz').value.split('x').map(Number);cv.width=w;cv.height=h;
+  if(bg){const s=Math.max(w/bg.width,h/bg.height)*$('zm').value/100,iw=bg.width*s,ih=bg.height*s;
+    cx.drawImage(bg,(w-iw)*$('px').value/100,(h-ih)*$('py').value/100,iw,ih)}
+  else{const g=cx.createLinearGradient(0,0,w,h);g.addColorStop(0,$('c1').value);g.addColorStop(1,$('c2').value);
+    cx.fillStyle=g;cx.fillRect(0,0,w,h)}
+  cx.globalAlpha=$('ov').value/100;cx.fillStyle=$('oc').value;cx.fillRect(0,0,w,h);cx.globalAlpha=1;
+
+  const fam=$('ff').value,al=$('al').value,m=Math.min(w,h);
+  let fs=Math.round(m*$('fz').value/100*1.6);
+  const wrap=s=>{cx.font=`800 ${s}px ${fam}`;const out=[];let l='';
+    for(const wd of $('ttl').value.trim().split(/\s+/)){const t=l?l+' '+wd:wd;
+      if(cx.measureText(t).width>w*0.84&&l){out.push(l);l=wd}else l=t}
+    if(l)out.push(l);return out};
+  let lines=wrap(fs);
+  while(lines.length*fs*1.2>h*0.7&&fs>16){fs-=4;lines=wrap(fs)}
+  const sub=$('sb').value.trim(),sf=Math.round(fs*$('sz2').value/100),lh=fs*1.2;
+  const bh=lines.length*lh+(sub?sf*1.8:0),pad=h*0.08;
+  let y=$('va').value==='top'?pad:$('va').value==='bottom'?h-pad-bh:(h-bh)/2;
+  const x=al==='left'?w*0.08:al==='right'?w*0.92:w/2;
+  cx.textAlign=al;cx.textBaseline='top';cx.lineJoin='round';
+  const shadow=on=>{cx.shadowColor=on?'rgba(0,0,0,.6)':'transparent';cx.shadowBlur=on?fs*0.12:0;cx.shadowOffsetY=on?fs*0.04:0};
+  const hl=$('hl').checked;
+  lines.forEach(L=>{
+    cx.font=`800 ${fs}px ${fam}`;
+    if(hl){const tw=cx.measureText(L).width,p=fs*0.18,bx=al==='left'?x:al==='right'?x-tw:x-tw/2;
+      shadow(false);cx.fillStyle=$('hc').value;cx.fillRect(bx-p,y,tw+p*2,lh*0.98);}
+    shadow($('sh').checked&&!hl);
+    if($('ol').checked){cx.strokeStyle='#000';cx.lineWidth=fs*0.12;cx.strokeText(L,x,y+(lh-fs)/2)}
+    cx.fillStyle=hl?'#111':$('tc').value;cx.fillText(L,x,y+(lh-fs)/2);y+=lh});
+  if(sub){shadow($('sh').checked);cx.font=`600 ${sf}px ${fam}`;cx.fillStyle=$('tc').value;
+    cx.fillText(sub,x,y+sf*0.4)}
+  shadow(false);
+
+  if(lg){const lw=w*$('ls').value/100,lh2=lg.height*lw/lg.width,mg=w*0.04,p=$('lp').value;
+    const lx=p==='c'?(w-lw)/2:p.includes('l')?mg:w-lw-mg,ly=p==='c'?(h-lh2)/2:p.includes('t')?mg:h-lh2-mg;
+    cx.drawImage(lg,lx,ly,lw,lh2)}
+}
+document.querySelectorAll('input:not([type=file]),select#sz,select#ff,select#al,select#va,select#lp').forEach(e=>{
+  e.addEventListener('input',draw);e.addEventListener('change',draw)});
+$('dl').onclick=()=>{const t=$('fmt').value;
+  cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download=($('ttl').value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'thumbnail')+(t==='png'?'.png':'.jpg');
+    a.click()},'image/'+t,0.92)};
+draw();
+</script></body></html>
